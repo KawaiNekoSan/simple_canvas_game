@@ -85,23 +85,23 @@ var update = function (modifier) {
 	if(hero.x <= 0){
 		hero.x = 0;
 	}
-	else if(calculateMaxWidth()){
+	else if(isMaxWidth()){
 		hero.x = canvas.width -32
 	}
 	if(hero.y <= 0){
 		hero.y = 0;
 	}
-	else if(calculateMaxHeight()){
+	else if(isMaxHeight()){
 		hero.y = canvas.height -32
 	}
 
 };
 
-var calculateMaxWidth = function(){
+var isMaxWidth = function(){
 	return hero.x >= canvas.width - 32;
 };
 
-var calculateMaxHeight = function(){
+var isMaxHeight = function(){
 	return hero.y >= canvas.height - 32;
 };
 
