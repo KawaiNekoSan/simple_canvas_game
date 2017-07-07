@@ -82,27 +82,27 @@ var update = function (modifier) {
 		++monstersCaught;
 		reset();
 	}
-	if(hero.x <= 0){
-		hero.x = 0;
+	if(hero.x <= 32){
+		hero.x = 32;
 	}
 	else if(isMaxWidth()){
-		hero.x = canvas.width -32
+		hero.x = canvas.width - 64
 	}
-	if(hero.y <= 0){
-		hero.y = 0;
+	if(hero.y <= 32){
+		hero.y = 32;
 	}
 	else if(isMaxHeight()){
-		hero.y = canvas.height -32
+		hero.y = canvas.height - 64
 	}
 
 };
 
 var isMaxWidth = function(){
-	return hero.x >= canvas.width - 32;
+	return hero.x >= canvas.width - 64;
 };
 
 var isMaxHeight = function(){
-	return hero.y >= canvas.height - 32;
+	return hero.y >= canvas.height - 64;
 };
 
 // Draw everything
