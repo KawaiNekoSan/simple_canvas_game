@@ -82,6 +82,27 @@ var update = function (modifier) {
 		++monstersCaught;
 		reset();
 	}
+	if(hero.x <= 0){
+		hero.x = 0;
+	}
+	else if(calculateMaxWidth()){
+		hero.x = canvas.width -32
+	}
+	if(hero.y <= 0){
+		hero.y = 0;
+	}
+	else if(calculateMaxHeight()){
+		hero.y = canvas.height -32
+	}
+
+};
+
+var calculateMaxWidth = function(){
+	return hero.x >= canvas.width - 32;
+};
+
+var calculateMaxHeight = function(){
+	return hero.y >= canvas.height - 32;
 };
 
 // Draw everything
