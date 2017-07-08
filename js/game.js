@@ -21,6 +21,14 @@ heroImage.onload = function () {
 };
 heroImage.src = "images/hero.png";
 
+// Hero border image
+var heroBorderReady = false;
+var heroBorderImage = new Image();
+heroBorderImage.onload = function () {
+	heroBorderReady = true;
+};
+heroBorderImage.src = "images/hero_border.png";
+
 // Monster image
 var monsterReady = false;
 var monsterImage = new Image();
@@ -29,12 +37,26 @@ monsterImage.onload = function () {
 };
 monsterImage.src = "images/monster.png";
 
+// Hole image
+var holeReady = false;
+var holeImage = new Image();
+holeImage.onload = function () {
+	holeReady = true;
+};
+holeImage.src = "images/hole.png";
+
+var borderTouched = false;
+
 // Game objects
 var hero = {
 	speed: 256 // movement in pixels per second
 };
 var monster = {};
 var monstersCaught = 0;
+
+var hole = {};
+
+var lastHole = {};
 
 // Handle keyboard controls
 var keysDown = {};
@@ -47,14 +69,33 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
+
+var checkCollision = function(objectA, objectB){
+	return objectA.x <= (objectB.x + 32)
+	&& objectB.x <= (objectA.x + 32)
+	&& objectA.y <= (objectB.y + 32)
+	&& objectB.y <= (objectA.y + 32)
+}
 // Reset the game when the player catches a monster
-var reset = function () {
+var reset = function(isHoleRequired) {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 
+	if(isHoleRequired){
+		do {
+			hole.x = 32 + (Math.random() * (canvas.width - 64));
+			hole.y = 32 + (Math.random() * (canvas.height - 64));
+		}
+		while (checkCollision(hole, hero));
+	}
+
 	// Throw the monster somewhere on the screen randomly
-	monster.x = 32 + (Math.random() * (canvas.width - 64));
-	monster.y = 32 + (Math.random() * (canvas.height - 64));
+	do {
+		monster.x = 32 + (Math.random() * (canvas.width - 64));
+		monster.y = 32 + (Math.random() * (canvas.height - 64));
+	}
+	while (checkCollision(monster, hero) && checkCollision(monster, hole));
+
 };
 
 // Update game objects
@@ -73,26 +114,42 @@ var update = function (modifier) {
 	}
 
 	// Are they touching?
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
+	if (checkCollision(hero, monster)){
 		++monstersCaught;
-		reset();
+		reset(false);
 	}
+
+	// Check if the hero falls into a hole
+	if (checkCollision(hero, hole)){
+		monstersCaught = 0;
+		reset(true);
+	}
+
+	let atLeastOneBorderIsTouched = false;
+
 	if(hero.x <= 32){
 		hero.x = 32;
+	  atLeastOneBorderIsTouched = true;
 	}
 	else if(isMaxWidth()){
-		hero.x = canvas.width - 64
+		hero.x = canvas.width - 64;
+		atLeastOneBorderIsTouched = true;
 	}
+
 	if(hero.y <= 32){
 		hero.y = 32;
+		atLeastOneBorderIsTouched = true;
 	}
 	else if(isMaxHeight()){
-		hero.y = canvas.height - 64
+		hero.y = canvas.height - 64;
+				atLeastOneBorderIsTouched = true;
+	}
+
+	if(atLeastOneBorderIsTouched){
+		borderTouched = true;
+	}
+	else {
+		borderTouched = false;
 	}
 
 };
@@ -111,12 +168,19 @@ var render = function () {
 		ctx.drawImage(bgImage, 0, 0);
 	}
 
-	if (heroReady) {
-		ctx.drawImage(heroImage, hero.x, hero.y);
+	if (heroBorderReady && borderTouched) {
+		ctx.drawImage(heroBorderImage, hero.x, hero.y);
 	}
+	else if(heroReady) {
+		ctx.drawImage(heroImage, hero.x, hero.y);
+	};
 
 	if (monsterReady) {
 		ctx.drawImage(monsterImage, monster.x, monster.y);
+	}
+
+	if (holeReady) {
+		ctx.drawImage(holeImage, hole.x, hole.y);
 	}
 
 	// Score
@@ -147,5 +211,5 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 
 // Let's play this game!
 var then = Date.now();
-reset();
+reset(true);
 main();
